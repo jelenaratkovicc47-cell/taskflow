@@ -1,6 +1,6 @@
 # TaskFlow delivery plan
 
-Local planning is underway. The designated Jira project is TF, board 2. The Story or Epic still needs confirmation. [TF assessment board](https://jelenaratkovicc47.atlassian.net/jira/software/projects/TF/boards/2)
+The planning documents were committed locally before coding. The assessment issue is TF-1. [TF-1](https://jelenaratkovicc47.atlassian.net/browse/TF-1)
 
 | Milestone | Tasks | Evidence to record in Jira |
 | --- | --- | --- |

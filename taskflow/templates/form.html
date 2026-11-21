@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit task' if editing else 'Create task' }}{% endblock %}
+{% macro field_error(name) %}
+  {% if errors.get(name) %}<span class="error" id="{{ name }}-error">{{ errors[name] }}</span>{% endif %}
+{% endmacro %}
+{% macro invalid(name) %}
+  {% if errors.get(name) %}aria-invalid="true" aria-describedby="{{ name }}-error"{% endif %}
+{% endmacro %}
+{% macro choices(name, label, options) %}
+  <div class="field">
+    <label for="{{ name }}">{{ label }}</label>
+    <select id="{{ name }}" name="{{ name }}" required {{ invalid(name) }}>
+      <option value="">Choose {{ label | lower }}</option>
+      {% if values.get(name) and values[name] not in options %}<option selected disabled>{{ values[name] }}</option>{% endif %}
+      {% for option in options %}<option {% if option == values.get(name) %}selected{% endif %}>{{ option }}</option>{% endfor %}
+    </select>
+    {{ field_error(name) }}
+  </div>
+{% endmacro %}
+{% block content %}
+<div class="narrow">
+  <h1>{{ 'Edit ' ~ values.task_id if editing else 'Create task' }}</h1>
+  <form class="panel task-form" method="post" action="{{ url_for('save_task', task_id=values.task_id) if editing else url_for('add_task') }}">
+    {% if errors %}<p class="error" role="alert">Check the highlighted fields and try again.</p>{% endif %}
+    {% if not editing %}
+      <label>Task ID
+        <input name="task_id" placeholder="TASK-101" required value="{{ values.get('task_id', '') }}" {{ invalid('task_id') }}>
+        {{ field_error('task_id') }}
+      </label>
+    {% endif %}
+    <label>Title
+      <input name="title" required value="{{ values.get('title', '') }}" {{ invalid('title') }}>
+      {{ field_error('title') }}
+    </label>
+    <label>Description
+      <textarea name="description" rows="5" required {{ invalid('description') }}>{{ values.get('description', '') }}</textarea>
+      {{ field_error('description') }}
+    </label>
+    <div class="field-pair">
+      {{ choices('assignee', 'Assignee', assignees) }}
+      {{ choices('priority', 'Priority', priorities) }}
+    </div>
+    <div class="actions">
+      <button class="primary" type="submit">{{ 'Save changes' if editing else 'Create task' }}</button>
+      <a href="{{ url_for('task_detail', task_id=values.task_id) if editing else url_for('board') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %} · TaskFlow</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell site-navigation">
+      <a class="brand" href="{{ url_for('board') }}">TaskFlow</a>
+      <nav aria-label="Main navigation">
+        <a href="{{ url_for('board') }}" {% if request.url.path == '/' %}aria-current="page"{% endif %}>Board</a>
+        <a href="{{ url_for('dashboard') }}" {% if request.url.path == '/dashboard' %}aria-current="page"{% endif %}>Dashboard</a>
+      </nav>
+      <a class="button primary" href="{{ url_for('new_task') }}">New task</a>
+    </div>
+  </header>
+  <main class="shell">{% block content %}{% endblock %}</main>
+</body>
+</html>

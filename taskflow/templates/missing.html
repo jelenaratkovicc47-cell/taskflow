@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}Task not found{% endblock %}
+{% block content %}
+<h1>Task not found</h1>
+<p>There is no task with the ID {{ task_id }}.</p>
+<a href="{{ url_for('board') }}">Back to board</a>
+{% endblock %}

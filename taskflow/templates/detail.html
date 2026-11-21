@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}{{ task.task_id }}{% endblock %}
+{% block content %}
+<div class="narrow">
+  <a href="{{ url_for('board') }}">Back to board</a>
+  <header class="detail-heading">
+    <div><p class="task-id">{{ task.task_id }}</p><h1>{{ task.title }}</h1></div>
+    <a class="button" href="{{ url_for('edit_task', task_id=task.task_id) }}">Edit task</a>
+  </header>
+  <section class="panel">
+    <h2>Description</h2>
+    <p class="description">{{ task.description }}</p>
+    <dl class="facts">
+      <div><dt>Assignee</dt><dd>{{ task.assignee }}</dd></div>
+      <div><dt>Priority</dt><dd><span class="priority {{ task.priority | lower }}">{{ task.priority }}</span></dd></div>
+      <div><dt>Created (UTC)</dt><dd><time datetime="{{ task.created_at }}">{{ task.created_at[:19] | replace('T', ' ') }}</time></dd></div>
+    </dl>
+    <form class="actions" method="post" action="{{ url_for('set_status', task_id=task.task_id) }}">
+      <div class="field">
+        <label for="task-status">Status</label>
+        <select id="task-status" name="status" {% if status_error %}aria-invalid="true" aria-describedby="status-error"{% endif %}>
+          {% for option in statuses %}<option {% if option == task.status %}selected{% endif %}>{{ option }}</option>{% endfor %}
+        </select>
+      </div>
+      <button class="primary" type="submit">Update status</button>
+    </form>
+    {% if status_error %}<p class="error" id="status-error" role="alert">{{ status_error }}</p>{% endif %}
+  </section>
+  <section class="panel history">
+    <h2>Status history</h2>
+    {% if history %}
+      <table>
+        <thead><tr><th scope="col">Previous</th><th scope="col">New</th><th scope="col">Changed (UTC)</th></tr></thead>
+        <tbody>
+          {% for entry in history %}
+            <tr><td>{{ entry.old_status }}</td><td>{{ entry.new_status }}</td><td><time datetime="{{ entry.changed_at }}">{{ entry.changed_at[:19] | replace('T', ' ') }}</time></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}<p class="empty">No status changes yet.</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

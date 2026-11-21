@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Project board{% endblock %}
+{% block content %}
+<h1>Project board</h1>
+<form class="filters" method="get" action="{{ url_for('board') }}">
+  <div class="field">
+    <label for="assignee-filter">Assignee</label>
+    <select id="assignee-filter" name="assignee">
+      <option value="">All assignees</option>
+      {% for option in assignees %}<option {% if option == assignee %}selected{% endif %}>{{ option }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="priority-filter">Priority</label>
+    <select id="priority-filter" name="priority">
+      <option value="">All priorities</option>
+      {% for option in priorities %}<option {% if option == priority %}selected{% endif %}>{{ option }}</option>{% endfor %}
+    </select>
+  </div>
+  <button type="submit">Apply filters</button>
+  {% if assignee or priority or filter_error %}<a href="{{ url_for('board') }}">Clear filters</a>{% endif %}
+</form>
+{% if filter_error %}
+  <p class="error" role="alert">{{ filter_error }}</p>
+{% else %}
+  <div class="board">
+    {% for status, tasks in columns.items() %}
+      <section class="column" aria-labelledby="column-{{ loop.index }}" data-status="{{ status }}">
+        <h2 id="column-{{ loop.index }}">{{ status }} <span class="count">{{ tasks | length }}</span></h2>
+        <ul class="card-list">
+          {% for task in tasks %}
+            <li>
+              <a class="card" href="{{ url_for('task_detail', task_id=task.task_id) }}">
+                <small>{{ task.task_id }}</small>
+                <strong>{{ task.title }}</strong>
+                <span class="card-footer"><span>{{ task.assignee }}</span><span class="priority {{ task.priority | lower }}">{{ task.priority }}</span></span>
+              </a>
+            </li>
+          {% else %}
+            <li class="empty">No tasks</li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}
