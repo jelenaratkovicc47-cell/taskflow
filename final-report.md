@@ -42,7 +42,7 @@ One correction came from running the AI-generated UI in Chrome. The first browse
 
 The assessment is tracked in [TF-1](https://jelenaratkovicc47.atlassian.net/browse/TF-1). The issue link was provided before implementation began. The local history records planning (`acb7050`), application work (`b1da058`), and verification and CI setup (`3aa9fb2`). Jira milestone comments and transitions are awaiting authenticated Jira access.
 
-The [GitHub Actions workflow](.github/workflows/ci.yml) installs the test dependencies and runs pytest on pushes and pull requests. The [target repository](https://github.com/jelenaratkovicc47-cell/taskflow) is readable from this session. Publishing and a hosted CI result are pending write access. The results above are from local verification.
+The [GitHub Actions workflow](.github/workflows/ci.yml) installs the test dependencies and runs pytest on pushes and pull requests. The application was published to the [TaskFlow repository](https://github.com/jelenaratkovicc47-cell/taskflow). The hosted `test` job passed on commit `610f24e`, including dependency installation and the pytest step. [Passing GitHub Actions run](https://github.com/jelenaratkovicc47-cell/taskflow/actions/runs/44922878231)
 
 ## Known limitations and interview demo
 
