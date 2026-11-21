@@ -1,0 +1,4 @@
+-r requirements.txt
+beautifulsoup4==4.15.0
+httpx2==2.16.2
+pytest==9.2.0
