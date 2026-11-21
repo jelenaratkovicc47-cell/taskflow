@@ -41,3 +41,4 @@ The tests use temporary SQLite files. The GitHub Actions workflow runs the same 
 
 - [Intent](intent.md), [specification](spec.md), and [delivery plan](plan.md)
 - [Assessment issue TF-1](https://jelenaratkovicc47.atlassian.net/browse/TF-1)
+- [Assessment report and browser evidence](final-report.md)
