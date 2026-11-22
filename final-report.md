@@ -2,7 +2,7 @@
 
 ## Problem and delivery
 
-A small software team needed one place to see task ownership, priority, and progress. TaskFlow provides a board for the project manager, developers, and QA. It runs locally with one simulated project and three assignees.
+A small software team needed one place to see task ownership, priority, and progress. TaskFlow provides a board for the project manager, developers, and QA. The current version runs locally with one simulated project and six assignees.
 
 - [Intent](intent.md) defines the business goal, scope, and success criteria.
 - [Specification](spec.md) defines behavior, the data model, and verification checks.
@@ -11,9 +11,9 @@ A small software team needed one place to see task ownership, priority, and prog
 
 ## Architecture and implementation
 
-FastAPI accepts HTML form submissions and renders Jinja templates. SQLite stores task details and status history. A unique task ID prevents duplicate records. A write transaction reads the current status, changes it, and records history together. Repeating the current status creates no history entry. The board independently filters by assignee and priority. The dashboard shows project-wide counts and the latest five created tasks.
+FastAPI accepts HTML form submissions and renders Jinja templates. SQLite stores task details and status history. A unique task ID prevents duplicate records. A write transaction reads the current status, changes it, and records history together. Repeating the current status creates no history entry. The board independently filters by assignee and priority. The dashboard shows project-wide counts, active work, completion percentage, open workload by assignee, and the five newest tasks.
 
-The sample-data script creates 30 tasks across the four statuses, all three priorities, and three simulated assignees. A second run inserts zero duplicates and preserves edits. The app binds to localhost for a reproducible demonstration.
+The sample-data script creates 60 tasks across the four statuses, all three priorities, and six simulated assignees. Running the expanded seed against the original demo database added 30 tasks and preserved the existing records. A second run added zero duplicates. The app binds to localhost for a reproducible demonstration.
 
 ## AI-assisted work and review
 
@@ -25,12 +25,19 @@ One correction came from running the AI-generated UI in Chrome. The first browse
 
 | Check | Observed result |
 | --- | --- |
-| Automated suite on Python 3.12 | 15 passed in a fresh virtual environment. Coverage includes input validation, duplicate IDs, edits, status transitions, concurrent moves, filtering, dashboard counts, seed repeatability, and restart persistence. |
-| Browser workflow | Chrome created and edited `TASK-101`, moved it from To Do through In Progress and In Review to Done, and showed three history entries. The combined Nina and High filter returned four cards. The board fit a 390-pixel viewport without horizontal overflow. |
-| Independent data check | The demo was checked against SQLite queries separate from the pytest suite. Chrome and SQLite agreed on 31 tasks, 7 open High priority tasks, and status counts of 8 To Do, 8 In Progress, 7 In Review, and 8 Done. |
-| Real server restart | After stopping and restarting Uvicorn with the same database, Chrome showed `TASK-101` in Done with all three history entries. |
+| Automated suite on Python 3.12 | 16 tests passed after the redesign and seed expansion. Coverage includes input validation, duplicate IDs, edits, status transitions, concurrent moves, filtering, dashboard totals, per-assignee workload, empty-dashboard behavior, seed repeatability, and restart persistence. The original clean-environment assessment run passed all 15 tests in the suite at that time. |
+| Browser workflow on November 21 | Chrome created and edited `TASK-101`, moved it from To Do through In Progress and In Review to Done, and showed three history entries. The combined Nina and High filter returned four cards. The board fit a 390-pixel viewport without horizontal overflow. |
+| Independent data check on November 21 | The original 30-task demo was checked against SQLite queries separate from the pytest suite. After the browser added `TASK-101`, Chrome and SQLite agreed on 31 tasks, 7 open High priority tasks, and status counts of 8 To Do, 8 In Progress, 7 In Review, and 8 Done. |
+| Real server restart on November 21 | After stopping and restarting Uvicorn with the same database, Chrome showed `TASK-101` in Done with all three history entries. |
+| Updated demo on November 22 | Chrome showed 60 tasks and six assignees. The new team members appeared in the workload panel and task form, and the Priya filter returned ten tasks. |
+
+## Online preview
+
+GitHub Pages serves a read-only snapshot with 60 sample tasks and six assignees. Visitors can view the dashboard and browse the sample board. The local FastAPI app starts from the README and provides task creation, editing, status changes, and SQLite persistence. [Open the TaskFlow preview](https://jelenaratkovicc47-cell.github.io/taskflow/)
 
 ## Evidence
+
+These screenshots show the original demo captured on November 21, before the redesign and expansion to 60 sample tasks.
 
 | Screen | What it shows |
 | --- | --- |
@@ -42,7 +49,7 @@ One correction came from running the AI-generated UI in Chrome. The first browse
 
 The assessment is tracked in [TF-1](https://jelenaratkovicc47.atlassian.net/browse/TF-1). The issue link was provided before implementation began. The local history records planning (`acb7050`), application work (`b1da058`), and verification and CI setup (`3aa9fb2`). Jira milestone comments and transitions are awaiting authenticated Jira access.
 
-The [GitHub Actions workflow](.github/workflows/ci.yml) installs the test dependencies and runs pytest on pushes and pull requests. The application was published to the [TaskFlow repository](https://github.com/jelenaratkovicc47-cell/taskflow). The hosted `test` job passed on commit `610f24e`, including dependency installation and the pytest step. [Passing GitHub Actions run](https://github.com/jelenaratkovicc47-cell/taskflow/actions/runs/44922878231)
+The GitHub Actions workflow installs the test dependencies and runs pytest on pushes and pull requests. The hosted `test` job passed on commit `f635480`, which includes the dashboard redesign, expanded sample data, and public preview. [GitHub Actions workflow](.github/workflows/ci.yml) · [TaskFlow repository](https://github.com/jelenaratkovicc47-cell/taskflow) · [Passing GitHub Actions run](https://github.com/jelenaratkovicc47-cell/taskflow/actions/runs/45037969015)
 
 ## Known limitations and interview demo
 

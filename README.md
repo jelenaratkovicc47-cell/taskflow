@@ -20,6 +20,10 @@ Open `http://127.0.0.1:8000/`. The sample script adds 60 tasks across six simula
 
 Tasks and status history persist in `taskflow.db` in the current directory. To use a different file, set `TASKFLOW_DB` to its path in the shell before seeding or starting the app. The file's parent directory must exist. This is a local demo with no login.
 
+## Online preview
+
+The read-only preview shows the dashboard and board with 60 simulated tasks and six assignees. Run the app locally using the steps above to create and edit tasks, change statuses, and save history. [Open the TaskFlow preview](https://jelenaratkovicc47-cell.github.io/taskflow/)
+
 ## Try the workflow
 
 1. Choose **New task** and enter an available ID such as `TASK-101`, a title, a description, an assignee, and a priority.
