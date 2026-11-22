@@ -18,8 +18,8 @@ Give the team one shared board so everyone can see who owns the work, what needs
 
 - A valid task can be created, edited, retrieved, and displayed on the board. Missing required fields and duplicate task IDs produce clear errors. A duplicate ID creates no extra record.
 - Each status change moves the task to the matching board column and records the time, previous status, and new status.
-- The dashboard shows accurate totals, counts by status, and a count of high-priority tasks outside Done. The board’s assignee and priority filters match the stored tasks.
-- A script creates at least 30 sample tasks across at least three assignees with varied statuses and priorities.
+- The dashboard shows accurate totals, counts by status, active work, completion percentage, open high-priority tasks, open workload per assignee, and the five newest tasks. The board’s assignee and priority filters work separately and together. An empty project shows zero totals.
+- The seed script creates 60 simulated tasks across six assignees, covering all four statuses and all three priorities. Rerunning it avoids duplicates and preserves existing edits.
 - Tasks and status history remain available after an application restart.
 - Automated tests pass in GitHub Actions, and a new developer can start the app by following the README.
 - The real Jira assessment issue links to the repository, CI run, final report, and progress history.
@@ -30,7 +30,9 @@ Use simulated project data only and free services. Use Python, FastAPI, SQLite, 
 
 ## In scope
 
-Create, retrieve, and edit tasks. Each task has an ID, title, description, assignee, priority, status, and creation date. Track status changes across To Do, In Progress, In Review, and Done. Group tasks by status and show each task’s title, assignee, and priority. Provide assignee and priority filters, a dashboard with totals and recent activity, sample data, persistent storage, automated tests, and startup instructions.
+Create, retrieve, and edit tasks. Each task has an ID, title, description, assignee, priority, status, and creation date. Show status history on the task detail page. Group tasks into To Do, In Progress, In Review, and Done, with each task’s title, assignee, and priority visible. Provide assignee and priority filters, sample data, persistent storage, automated tests, and startup instructions.
+
+The dashboard shows project totals, workflow counts, active work in In Progress and In Review, completion percentage, and open high-priority tasks. It links each assignee’s open workload to their filtered board view and lists the five newest tasks with their assignee, priority, status, and creation date.
 
 ## Out of scope
 
@@ -38,9 +40,10 @@ No real Jira integration, paid services, enterprise authentication, notification
 
 ## Assumptions
 
-TaskFlow covers one project, uses a fixed list of simulated assignees, and requires no login. Tasks can move from any status to any other status. The real Jira issue tracks the assessment separately from TaskFlow.
+TaskFlow covers one project, uses a fixed list of six simulated assignees, and requires no login. Tasks can move from any status to any other status. The real Jira issue tracks the assessment separately from TaskFlow.
+
+Users enter a unique task ID when creating a task, such as `TASK-101`. The ID stays the same after creation. The dashboard shows the five newest tasks, and status changes appear on each task’s detail page.
 
 ## Open questions
 
-- Should users enter task IDs, or should TaskFlow generate them?
-- Should the dashboard show recently created tasks, recent status changes, or both?
+All current questions are resolved.
