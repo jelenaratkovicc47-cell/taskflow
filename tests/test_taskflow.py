@@ -153,24 +153,52 @@ def test_dashboard_totals_and_filters(client):
     assert both == {"To Do": [], "In Progress": [], "In Review": [], "Done": ["TASK-102"]}
     assert client.get("/", params={"assignee": "Sam"}).status_code == 422
 
+    client.post("/tasks/TASK-104/status", data={"status": "In Progress"})
+    client.post("/tasks/TASK-105/status", data={"status": "In Review"})
     dashboard = html(client.get("/dashboard"))
     totals = {item.dt.get_text(strip=True): int(item.dd.get_text(strip=True)) for item in dashboard.select(".metrics > div")}
-    assert totals == {"Total tasks": 6, "Open high priority": 1, "To Do": 5, "In Progress": 0, "In Review": 0, "Done": 1}
+    assert totals == {"Total tasks": 6, "Active work": 2, "Open high priority": 1, "Completed": 1}
+    counts = {item.dt.get_text(strip=True): int(item.dd.get_text(strip=True)) for item in dashboard.select(".workflow-counts > div")}
+    assert counts == {"To Do": 3, "In Progress": 1, "In Review": 1, "Done": 1}
+    assert dashboard.select_one(".completion-ring").get_text(strip=True) == "17%"
+    workload = {
+        link.select_one(".workload-name").get_text(strip=True): link.select_one(".workload-count").get_text(strip=True)
+        for link in dashboard.select(".workload-list a")
+    }
+    assert workload == {
+        "Maya": "2 open", "Leo": "1 open", "Nina": "2 open",
+        "Avery": "0 open", "Omar": "0 open", "Priya": "0 open",
+    }
+    assert [link["href"].split("?")[-1] for link in dashboard.select(".workload-list a")] == [
+        "assignee=Maya", "assignee=Leo", "assignee=Nina", "assignee=Avery", "assignee=Omar", "assignee=Priya",
+    ]
     links = dashboard.select("tbody a")
     assert [link["href"].rsplit("/", 1)[-1] for link in links] == [f"TASK-{number}" for number in range(106, 101, -1)]
 
 
+def test_empty_dashboard_shows_zero_activity(client):
+    dashboard = html(client.get("/dashboard"))
+    assert [int(value.get_text(strip=True)) for value in dashboard.select(".metrics dd")] == [0, 0, 0, 0]
+    assert dashboard.select_one(".completion-ring").get_text(strip=True) == "0%"
+    assert dashboard.select_one(".dashboard-empty a").get_text(strip=True) == "Create a task"
+
+
 def test_seed_is_repeatable_and_preserves_edits(database):
-    assert seed(database) == 30
+    assert seed(database) == 60
     with TestClient(create_app(database)) as browser:
         response = browser.post("/tasks/TASK-1001/edit", data={**TASK, "title": "Keep this edit"})
         assert html(response).h1.get_text(strip=True) == "Keep this edit"
+        new_task = html(browser.get("/tasks/new"))
+        assignees = [option.get_text(strip=True) for option in new_task.select('[name="assignee"] option')[1:]]
+        assert assignees == ["Maya", "Leo", "Nina", "Avery", "Omar", "Priya"]
+        priya_tasks = board_tasks(browser.get("/", params={"assignee": "Priya"}))
+        assert sum(len(tasks) for tasks in priya_tasks.values()) == 10
     assert seed(database) == 0
     with sqlite3.connect(database) as connection:
         rows = connection.execute("SELECT task_id, status, assignee, priority, title FROM tasks").fetchall()
-    assert len(rows) == 30
+    assert len(rows) == 60
     assert {row[1] for row in rows} == set(STATUSES)
-    assert {row[2] for row in rows} == {"Maya", "Leo", "Nina"}
+    assert {row[2] for row in rows} == {"Maya", "Leo", "Nina", "Avery", "Omar", "Priya"}
     assert {row[3] for row in rows} == {"Low", "Medium", "High"}
     assert next(row[4] for row in rows if row[0] == "TASK-1001") == "Keep this edit"
 

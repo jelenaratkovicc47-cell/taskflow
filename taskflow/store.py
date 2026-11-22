@@ -7,7 +7,7 @@ from pathlib import Path
 
 STATUSES = ("To Do", "In Progress", "In Review", "Done")
 PRIORITIES = ("Low", "Medium", "High")
-ASSIGNEES = ("Maya", "Leo", "Nina")
+ASSIGNEES = ("Maya", "Leo", "Nina", "Avery", "Omar", "Priya")
 
 
 def database_path() -> Path:

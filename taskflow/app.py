@@ -144,10 +144,22 @@ def create_app(path: Path | None = None) -> FastAPI:
         with store.connect(path) as database:
             tasks = store.list_tasks(database)
         counts = dict.fromkeys(store.STATUSES, 0)
+        open_by_assignee = dict.fromkeys(store.ASSIGNEES, 0)
         high_open = 0
         for task in tasks:
             counts[task["status"]] += 1
-            high_open += task["priority"] == "High" and task["status"] != "Done"
-        return page(request, "dashboard.html", counts=counts, total=len(tasks), high_open=high_open, recent=tasks[:5])
+            if task["status"] != "Done":
+                open_by_assignee[task["assignee"]] += 1
+                high_open += task["priority"] == "High"
+
+        total = len(tasks)
+        done = counts["Done"]
+        return page(
+            request, "dashboard.html",
+            counts=counts, total=total, high_open=high_open, recent=tasks[:5],
+            active=counts["In Progress"] + counts["In Review"],
+            completion=round(100 * done / total) if total else 0,
+            open_by_assignee=open_by_assignee,
+        )
 
     return app

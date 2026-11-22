@@ -1,23 +1,115 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<h1>Dashboard</h1>
-<dl class="metrics">
-  <div><dt>Total tasks</dt><dd>{{ total }}</dd></div>
-  <div class="attention"><dt>Open high priority</dt><dd>{{ high_open }}</dd></div>
-  {% for status, count in counts.items() %}<div><dt>{{ status }}</dt><dd>{{ count }}</dd></div>{% endfor %}
-</dl>
-<section class="panel">
-  <h2>Recent tasks</h2>
-  {% if recent %}
-    <table>
-      <thead><tr><th scope="col">Task</th><th scope="col">Status</th><th scope="col">Created (UTC)</th></tr></thead>
-      <tbody>
-        {% for task in recent %}
-          <tr><td><a href="{{ url_for('task_detail', task_id=task.task_id) }}">{{ task.title }}</a></td><td>{{ task.status }}</td><td><time datetime="{{ task.created_at }}">{{ task.created_at[:19] | replace('T', ' ') }}</time></td></tr>
+<div class="project-dashboard">
+  <header class="overview-heading">
+    <div>
+      <h1>Project overview</h1>
+      <p>TaskFlow demo project <span aria-hidden="true">·</span> {{ assignees | length }} team members</p>
+    </div>
+    <a class="button" href="{{ url_for('board') }}">Open board <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <dl class="metrics" aria-label="Project totals">
+    <div class="metric">
+      <dt><span class="metric-icon all-icon" aria-hidden="true"></span>Total tasks</dt>
+      <dd>{{ total }}</dd>
+    </div>
+    <div class="metric">
+      <dt><span class="metric-icon active-icon" aria-hidden="true"></span>Active work</dt>
+      <dd>{{ active }}</dd>
+    </div>
+    <div class="metric">
+      <dt><span class="metric-icon priority-icon" aria-hidden="true"></span>Open high priority</dt>
+      <dd>{{ high_open }}</dd>
+    </div>
+    <div class="metric">
+      <dt><span class="metric-icon completed-icon" aria-hidden="true"></span>Completed</dt>
+      <dd>{{ counts['Done'] }}</dd>
+    </div>
+  </dl>
+
+  <div class="overview-grid">
+    <section class="panel workflow-panel" aria-labelledby="workflow-heading">
+      <div class="panel-heading">
+        <h2 id="workflow-heading">Workflow breakdown</h2>
+        <p>Tasks by status</p>
+      </div>
+      <dl class="workflow-counts">
+        {% for status, count in counts.items() %}
+          <div class="status-{{ status | lower | replace(' ', '-') }}">
+            <dt><span class="status-dot" aria-hidden="true"></span>{{ status }}</dt>
+            <dd>
+              <span class="workflow-track" aria-hidden="true"><span style="--share: {{ (100 * count / total) if total else 0 }}%"></span></span>
+              <strong>{{ count }}</strong>
+            </dd>
+          </div>
         {% endfor %}
-      </tbody>
-    </table>
-  {% else %}<p class="empty">No tasks yet.</p>{% endif %}
-</section>
+      </dl>
+    </section>
+
+    <section class="completion-panel" aria-labelledby="completion-heading">
+      <div class="completion-copy">
+        <h2 id="completion-heading">Project completion</h2>
+        <p><strong>{{ counts['Done'] }}</strong> of {{ total }} tasks done</p>
+        <p class="completion-remaining">{{ total - counts['Done'] }} still open</p>
+      </div>
+      <div class="completion-ring" role="img" aria-label="{{ completion }} percent complete" style="--completion: {{ completion }}%">
+        <span>{{ completion }}%</span>
+      </div>
+    </section>
+  </div>
+
+  <div class="overview-grid detail-grid">
+    <section class="panel recent-panel" aria-labelledby="recent-heading">
+      <div class="panel-heading">
+        <h2 id="recent-heading">Recent tasks</h2>
+        <p>Last five tasks created</p>
+      </div>
+      {% if recent %}
+        <div class="dashboard-table" tabindex="0" role="region" aria-labelledby="recent-heading">
+          <table aria-label="Recently created tasks">
+            <thead><tr><th scope="col">Task</th><th scope="col" class="wide-column">Assignee</th><th scope="col">Status</th><th scope="col" class="wide-column">Priority</th><th scope="col" class="wide-column">Created (UTC)</th></tr></thead>
+            <tbody>
+              {% for task in recent %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('task_detail', task_id=task.task_id) }}">{{ task.title }}</a>
+                    <small>{{ task.task_id }}</small>
+                    <small class="mobile-task-meta">{{ task.assignee }} · {{ task.priority }} · <time datetime="{{ task.created_at }}">{{ task.created_at[:10] }}</time></small>
+                  </td>
+                  <td class="wide-column">{{ task.assignee }}</td>
+                  <td><span class="status-label status-{{ task.status | lower | replace(' ', '-') }}"><span class="status-dot" aria-hidden="true"></span>{{ task.status }}</span></td>
+                  <td class="wide-column"><span class="priority {{ task.priority | lower }}">{{ task.priority }}</span></td>
+                  <td class="wide-column"><time datetime="{{ task.created_at }}">{{ task.created_at[:10] }}</time></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty dashboard-empty">No tasks yet. <a href="{{ url_for('new_task') }}">Create a task</a> to get started.</p>
+      {% endif %}
+    </section>
+
+    <section class="panel workload-panel" aria-labelledby="workload-heading">
+      <div class="panel-heading">
+        <h2 id="workload-heading">Team workload</h2>
+        <p>Open tasks per assignee</p>
+      </div>
+      <ul class="workload-list">
+        {% for assignee, count in open_by_assignee.items() %}
+          <li>
+            <a href="{{ url_for('board').include_query_params(assignee=assignee) }}">
+              <span class="avatar avatar-{{ loop.index }}" aria-hidden="true">{{ assignee[0] }}</span>
+              <span class="workload-name">{{ assignee }}</span>
+              <span class="workload-count">{{ count }} open</span>
+              <span class="workload-arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
 {% endblock %}
