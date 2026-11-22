@@ -64,27 +64,26 @@ The GitHub Actions workflow installs the test dependencies and runs pytest on pu
 
 ### AI prompt example
 
-I asked Codex to make intent.md consistent with the final
-spec.md: Write intent.md for TaskFlow with these sections:
-- Problem (in plain business language)
-- Business goal
-- Users (project manager, developers, QA)
-- Success criteria (measurable, based on the acceptance criteria)
-- Constraints (simulated data only, no paid services, simple stack:
-Python, FastAPI, SQLite, simple HTML board, pytest, GitHub Actions)
-- In scope
-- Out of scope (copy from the assignment's out-of-scope list)
-- Assumptions (e.g. any status can move to any other status; single
-project; no login; fixed list of simulated assignees)
-- Open questions
+At the start of the project, I gave Codex this planning prompt, which I
+prepared with help from Claude:
 
-Keep it to about one page. Plain English, no code..
+> Write intent.md for TaskFlow with these sections: Problem (in plain
+> business language); Business goal; Users (project manager, developers,
+> QA); Success criteria (measurable, based on the acceptance criteria);
+> Constraints (simulated data only, no paid services, simple stack: Python,
+> FastAPI, SQLite, simple HTML board, pytest, GitHub Actions); In scope; Out
+> of scope (copy from the assignment's out-of-scope list); Assumptions (e.g.
+> any status can move to any other status; single project; no login; fixed
+> list of simulated assignees); Open questions. Keep it to about one page.
+> Plain English, no code.
 
-**What Codex produced:** an updated intent.md with the final numbers (60
-sample tasks, six assignees), the dashboard description from the spec, and
-the open questions marked as resolved.
+**What Codex produced:** the first version of intent.md (commit acb7050),
+covering the problem, goal, users, success criteria, constraints, scope,
+assumptions, and two open questions.
 
-**How I checked it:** before committing, I reviewed every changed line in
+**Later review and correction:** on November 22, Codex updated intent.md to
+match the final spec (60 sample tasks, six assignees) and marked the open
+questions as resolved. Before committing, I reviewed every changed line in
 GitHub Desktop and compared it with spec.md. I also noticed that my personal
 notes file had been saved inside the project folder, so I left it out of the
 commit. The reviewed change is commit 88ffc21.
