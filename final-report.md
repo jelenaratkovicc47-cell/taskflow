@@ -60,6 +60,74 @@ TF-1 was created before implementation began. The six child items track the work
 | [TF-7](https://jelenaratkovicc47.atlassian.net/browse/TF-7) · Test and document delivery | [Test and CI setup](https://github.com/jelenaratkovicc47-cell/taskflow/commit/3aa9fb2), [passing CI run](https://github.com/jelenaratkovicc47-cell/taskflow/actions/runs/45039152830), and [README](README.md) |
 
 The GitHub Actions workflow installs the test dependencies and runs pytest on pushes and pull requests. The hosted `test` job passed on commit `f635480`, which includes the dashboard redesign, expanded sample data, and public preview. [GitHub Actions workflow](.github/workflows/ci.yml) · [TaskFlow repository](https://github.com/jelenaratkovicc47-cell/taskflow) · [Passing GitHub Actions run](https://github.com/jelenaratkovicc47-cell/taskflow/actions/runs/45037969015)
+## My AI usage and verification
+
+### AI prompt example
+
+I asked Codex to make intent.md consistent with the final
+spec.md: Write intent.md for TaskFlow with these sections:
+- Problem (in plain business language)
+- Business goal
+- Users (project manager, developers, QA)
+- Success criteria (measurable, based on the acceptance criteria)
+- Constraints (simulated data only, no paid services, simple stack:
+Python, FastAPI, SQLite, simple HTML board, pytest, GitHub Actions)
+- In scope
+- Out of scope (copy from the assignment's out-of-scope list)
+- Assumptions (e.g. any status can move to any other status; single
+project; no login; fixed list of simulated assignees)
+- Open questions
+
+Keep it to about one page. Plain English, no code..
+
+**What Codex produced:** an updated intent.md with the final numbers (60
+sample tasks, six assignees), the dashboard description from the spec, and
+the open questions marked as resolved.
+
+**How I checked it:** before committing, I reviewed every changed line in
+GitHub Desktop and compared it with spec.md. I also noticed that my personal
+notes file had been saved inside the project folder, so I left it out of the
+commit. The reviewed change is commit 88ffc21.
+
+### How I checked the app myself (November 22)
+
+I started the app on my Mac by following the README, then tested it by hand:
+
+- Created TASK-500. It appeared on the board in To Do.
+- Tried to create TASK-500 again. The app showed "TASK-500 already exists.
+  Choose a different ID." and did not create a second task.
+- Tried to create a task with an empty title. The browser blocked it with
+  "Fill out this field". The app's own server-side check is covered by the
+  automated tests.
+- Edited TASK-500, changing the assignee to Leo and the priority to Medium.
+  The changes were saved.
+- Moved TASK-500 from To Do to In Progress, then to Done. The status history
+  showed both changes with times, newest first.
+- Stopped the app and started it again. TASK-500 was still Done, assigned to
+  Leo, with both history entries.
+
+### How I verified the AI-written tests
+
+I ran the suite myself with `python -m pytest`: 16 passed. To check that the
+tests really detect errors, I changed one expected value in
+`test_dashboard_totals_and_filters` from 6 to 7. pytest reported 1 failed,
+15 passed, showing `{'Total tasks': 6} != {'Total tasks': 7}`. I changed the
+value back and the suite passed again (16 passed).
+
+## Challenges and next steps
+
+**Challenges:** I was new to Git, GitHub, Jira, and the Terminal. While
+checking the app, I ran into three real problems and solved them: port 8000
+was already in use, so I started the app on port 8002; the board was empty
+until I ran the sample-data script in my project folder; and a new Terminal
+window needed the virtual environment activated before Python commands would
+work.
+
+**What I would do differently:** commit after each feature instead of in
+large batches, and post Jira updates at the moment each milestone finishes.
+
+**Next steps:** optional due dates with an overdue count on the dashboard,
+login and permissions, and generated task IDs.
 
 ## Known limitations and interview demo
 
