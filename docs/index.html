@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>TaskFlow · Dashboard demo</title>
+<style>:root {
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+  color: #22203b;
+  background: #f6f6fb;
+  --accent: #5137cb;
+  --border: #e0e0ed;
+  --muted: #625f78;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: var(--accent); text-underline-offset: .23em; }
+:focus-visible { outline: 3px solid #a5561f; outline-offset: 3px; }
+.shell { width: min(100% - 2rem, 76rem); margin-inline: auto; }
+.site-header { background: white; border-bottom: 1px solid var(--border); }
+.site-navigation { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; padding-block: .85rem; }
+.brand { display: inline-flex; align-items: center; gap: .65rem; font-size: 1.25rem; font-weight: 800; letter-spacing: -.045em; }
+.brand-mark {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  border-radius: .6rem;
+  background: linear-gradient(white, white) 9px 9px / 13px 2px no-repeat,
+              linear-gradient(white, white) 9px 15px / 10px 2px no-repeat,
+              linear-gradient(white, white) 9px 21px / 6px 2px no-repeat, var(--accent);
+}
+.site-header a { color: inherit; text-decoration: none; }
+.site-header nav { display: flex; gap: .25rem; margin-right: auto; }
+.site-header nav a { padding: .55rem .7rem; color: var(--muted); border-radius: .5rem; font-size: .875rem; font-weight: 650; }
+.site-header nav a:hover, .site-header nav a[aria-current] { background: #efecff; color: var(--accent); }
+.site-header .primary { color: white; }
+main { padding-block: 2.5rem; }
+h1 { font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -.055em; line-height: 1.12; margin: 0 0 1.5rem; overflow-wrap: anywhere; }
+h2 { font-size: 1.1rem; margin: 0 0 1rem; }
+.button, button, input, select, textarea { font: inherit; }
+.button, button { display: inline-block; padding: .59rem .9rem; color: var(--accent); border: 1px solid var(--border); border-radius: .5rem; background: white; font-weight: 650; text-decoration: none; cursor: pointer; white-space: nowrap; }
+.button:hover, button:hover { background: #efecff; }
+.primary { background: var(--accent); border-color: transparent; color: white; }
+.primary:hover { background: #432cb3; }
+input, select, textarea { color: inherit; background: white; width: 100%; padding: .55rem .65rem; border: 1px solid #aabbb4; border-radius: .45rem; }
+textarea { resize: vertical; }
+label, .field { display: grid; gap: .35rem; }
+label { font-weight: 600; }
+.filters, .actions { display: flex; flex-wrap: wrap; gap: .75rem 1rem; align-items: end; }
+.filters { margin-bottom: 1.25rem; }
+.filters a, .actions a { align-self: end; margin-bottom: .62rem; }
+.board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.column { min-width: 0; background: #efeef7; padding: .8rem; border: 1px solid var(--border); border-radius: .8rem; }
+.column h2 { display: flex; justify-content: space-between; align-items: center; gap: .4rem; margin: .1rem 0 .75rem; }
+.count { border-radius: 1rem; background: white; min-width: 1.65rem; text-align: center; padding: .12rem .35rem; font-size: .85rem; }
+.card-list { padding: 0; margin: 0; display: grid; gap: .65rem; list-style: none; }
+.card { display: grid; gap: .3rem; color: inherit; padding: .8rem; border: 1px solid var(--border); border-radius: .55rem; background: white; text-decoration: none; overflow-wrap: anywhere; }
+.card:hover { border-color: var(--accent); }
+.card small, .empty, .task-id, dt { color: var(--muted); }
+.card-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .4rem; margin-top: .25rem; font-size: .875rem; }
+.priority { display: inline-block; border-radius: 1rem; padding: .12rem .6rem; font-size: .82rem; font-weight: 650; }
+.priority.low { color: #215247; background: #deefe4; }
+.priority.medium { color: #59460c; background: #f5ebcb; }
+.priority.high { color: #812d1b; background: #fce6dd; }
+.narrow { max-width: 48rem; }
+.panel { background: white; padding: 1.25rem; border: 1px solid var(--border); border-radius: .8rem; }
+.task-form, .field-pair { display: grid; gap: 1rem; }
+.field-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.error { color: #9b291e; margin-block: .25rem; }
+[aria-invalid="true"] { border-color: #9b291e; }
+.detail-heading { display: flex; align-items: start; justify-content: space-between; gap: 1rem; margin: 1.25rem 0; }
+.detail-heading h1, .task-id { margin: 0; }
+.description { white-space: pre-wrap; overflow-wrap: anywhere; }
+.facts { display: flex; flex-wrap: wrap; gap: .7rem 2rem; }
+dd { margin: .2rem 0 0; }
+.history { margin-top: 1rem; }
+table { border-collapse: collapse; width: 100%; text-align: left; overflow-wrap: anywhere; }
+th, td { padding: .65rem .4rem; border-bottom: 1px solid var(--border); }
+tbody tr:last-child td { border-bottom: 0; }
+
+.project-dashboard { display: grid; gap: 1.15rem; }
+.overview-heading { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: .2rem; }
+.overview-heading h1 { margin-bottom: .35rem; }
+.overview-heading p, .panel-heading p { margin: 0; color: var(--muted); font-size: .9rem; }
+.overview-heading .button span { margin-left: .35rem; }
+.metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; margin: 0; }
+.metric, .project-dashboard .panel { background: white; border: 1px solid var(--border); border-radius: 1rem; box-shadow: 0 2px 4px #28234307; }
+.metric { padding: 1rem 1.2rem; }
+.metric dt { display: flex; align-items: center; gap: .55rem; font-size: .86rem; font-weight: 650; }
+.metric dd { margin-top: .35rem; font-size: 2rem; font-weight: 780; letter-spacing: -.065em; font-variant-numeric: tabular-nums; }
+.metric-icon { display: grid; flex: none; place-items: center; width: 1.85rem; height: 1.85rem; border-radius: .5rem; font-size: 1rem; font-weight: 800; }
+.all-icon { color: #5137cb; background: #eee9ff; }
+.active-icon { color: #1d55b3; background: #e8f0ff; }
+.priority-icon { color: #96452f; background: #fcebe4; }
+.completed-icon { color: #236548; background: #e3f6eb; }
+.all-icon::before { content: "▦"; }
+.active-icon::before { content: "↗"; }
+.priority-icon::before { content: "!"; }
+.completed-icon::before { content: "✓"; }
+.overview-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 1rem; }
+.detail-grid { grid-template-columns: minmax(0, 5fr) minmax(13rem, 2fr); align-items: start; }
+.project-dashboard .panel { min-width: 0; padding: 1.2rem; }
+.panel-heading { margin-bottom: 1rem; }
+.panel-heading h2, .completion-copy h2 { margin-bottom: .25rem; font-size: 1.13rem; letter-spacing: -.025em; }
+.workflow-counts { display: grid; gap: .85rem; margin: 0; }
+.workflow-counts div, .workflow-counts dd { display: grid; align-items: center; gap: .7rem; }
+.workflow-counts div { grid-template-columns: 7rem minmax(0, 1fr); }
+.workflow-counts dd { grid-template-columns: minmax(0, 1fr) 1.5rem; margin: 0; text-align: right; font-size: .83rem; }
+.workflow-counts dt { display: flex; align-items: center; gap: .5rem; color: inherit; font-size: .83rem; font-weight: 600; }
+.status-to-do { --status-fill: #8380a6; --status-text: #514d71; --status-bg: #eeedf6; }
+.status-in-progress { --status-fill: #526add; --status-text: #304cb6; --status-bg: #eaf0ff; }
+.status-in-review { --status-fill: #9256cd; --status-text: #6b34a1; --status-bg: #f3e9ff; }
+.status-done { --status-fill: #359e72; --status-text: #236548; --status-bg: #e3f5ea; }
+.status-dot { display: inline-block; flex: none; width: .46rem; height: .46rem; border-radius: 50%; background: var(--status-fill); }
+.workflow-track { display: block; height: .46rem; overflow: hidden; border-radius: 1rem; background: #efeff6; }
+.workflow-track span { display: block; width: var(--share); height: 100%; border-radius: inherit; background: var(--status-fill); }
+.completion-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  color: white;
+  background: radial-gradient(ellipse at top right, #51349b 0%, transparent 72%), #292048;
+}
+.completion-copy p { margin: .8rem 0 .2rem; color: #e3d9fb; font-size: .9rem; }
+.completion-copy strong { color: white; font-size: 1.75rem; font-weight: 760; }
+.completion-copy .completion-remaining { margin: 0; font-size: .83rem; }
+.completion-ring { display: grid; flex: none; place-items: center; width: 6.45rem; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(#c2acff var(--completion), #ffffff29 0); }
+.completion-ring span { display: grid; place-items: center; width: 83%; aspect-ratio: 1; border-radius: 50%; background: #38275f; font-size: 1.35rem; font-weight: 800; letter-spacing: -.05em; }
+.dashboard-table { max-width: 100%; overflow-x: auto; border-radius: .45rem; }
+.dashboard-table table { min-width: 35rem; font-size: .85rem; }
+.dashboard-table thead { background: #f5f4fa; color: var(--muted); }
+.dashboard-table th, .dashboard-table td { padding: .65rem .55rem; }
+.dashboard-table th { font-size: .75rem; }
+.dashboard-table td small { display: block; margin-top: .15rem; color: var(--muted); font-size: .73rem; }
+.dashboard-table td .mobile-task-meta { display: none; }
+.dashboard-table td a { color: inherit; font-weight: 680; text-decoration: none; }
+.dashboard-table td a:hover { color: var(--accent); text-decoration: underline; }
+.dashboard-table time { white-space: nowrap; }
+.status-label { display: inline-flex; gap: .35rem; align-items: center; padding: .22rem .48rem; border-radius: 1rem; color: var(--status-text); background: var(--status-bg); white-space: nowrap; font-size: .73rem; font-weight: 650; }
+.dashboard-empty { margin-bottom: 0; }
+.workload-list { display: grid; margin: 0; padding: 0; list-style: none; }
+.workload-list li + li { border-top: 1px solid var(--border); }
+.workload-list a { display: flex; align-items: center; gap: .6rem; padding: .65rem 0; color: inherit; text-decoration: none; }
+.workload-list a:hover .workload-name { color: var(--accent); text-decoration: underline; }
+.avatar { display: grid; flex: none; place-items: center; width: 1.9rem; aspect-ratio: 1; border-radius: 50%; font-size: .8rem; font-weight: 750; }
+.avatar-1 { color: #5137cb; background: #eee9ff; }
+.avatar-2 { color: #1d55b3; background: #e8f0ff; }
+.avatar-3 { color: #236548; background: #e3f6eb; }
+.avatar-4 { color: #96452f; background: #fcebe4; }
+.avatar-5 { color: #76561a; background: #fbf1d8; }
+.avatar-6 { color: #7d3569; background: #fae8f4; }
+.workload-name { flex: 1; font-size: .86rem; font-weight: 680; }
+.workload-count, .workload-arrow { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+
+@media (max-width: 54rem) {
+  .board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .detail-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 42rem) {
+  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .overview-grid { grid-template-columns: 1fr; }
+  .dashboard-table table { min-width: 0; }
+  .dashboard-table .wide-column { display: none; }
+  .dashboard-table td .mobile-task-meta { display: block; }
+}
+
+@media (max-width: 34rem) {
+  .site-navigation { column-gap: .85rem; }
+  .site-header nav { order: 1; width: 100%; }
+  .site-header .primary { margin-left: auto; }
+  .board, .field-pair { grid-template-columns: 1fr; }
+  .detail-heading { flex-wrap: wrap; }
+  .metric { padding: .75rem; }
+}
+
+.workload-row { display: flex; align-items: center; gap: .6rem; padding: .65rem 0; }
+#sample-board { margin-top: 1rem; scroll-margin-top: 1rem; }
+#sample-board .board { margin-top: 1rem; }
+#sample-board .card { scroll-margin-top: 1rem; }
+#sample-board .card:target { outline: 3px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+<div class="shell site-navigation">
+<a class="brand" href="./"><span aria-hidden="true" class="brand-mark"></span>TaskFlow</a>
+<nav aria-label="Main navigation">
+<a href="#sample-board">Board</a>
+<a aria-current="page" href="./">Dashboard</a>
+</nav>
+<a class="button primary" href="https://github.com/jelenaratkovicc47-cell/taskflow">View source</a>
+</div>
+</header>
+<main class="shell">
+<div class="project-dashboard">
+<header class="overview-heading">
+<div>
+<h1>Project overview</h1>
+<p>Read-only demo · 60 simulated tasks · 6 team members</p>
+</div>
+<a class="button" href="#sample-board">Browse sample board ↓</a>
+</header>
+<dl aria-label="Project totals" class="metrics">
+<div class="metric">
+<dt><span aria-hidden="true" class="metric-icon all-icon"></span>Total tasks</dt>
+<dd>60</dd>
+</div>
+<div class="metric">
+<dt><span aria-hidden="true" class="metric-icon active-icon"></span>Active work</dt>
+<dd>30</dd>
+</div>
+<div class="metric">
+<dt><span aria-hidden="true" class="metric-icon priority-icon"></span>Open high priority</dt>
+<dd>13</dd>
+</div>
+<div class="metric">
+<dt><span aria-hidden="true" class="metric-icon completed-icon"></span>Completed</dt>
+<dd>15</dd>
+</div>
+</dl>
+<div class="overview-grid">
+<section aria-labelledby="workflow-heading" class="panel workflow-panel">
+<div class="panel-heading">
+<h2 id="workflow-heading">Workflow breakdown</h2>
+<p>Tasks by status</p>
+</div>
+<dl class="workflow-counts">
+<div class="status-to-do">
+<dt><span aria-hidden="true" class="status-dot"></span>To Do</dt>
+<dd>
+<span aria-hidden="true" class="workflow-track"><span style="--share: 25.0%"></span></span>
+<strong>15</strong>
+</dd>
+</div>
+<div class="status-in-progress">
+<dt><span aria-hidden="true" class="status-dot"></span>In Progress</dt>
+<dd>
+<span aria-hidden="true" class="workflow-track"><span style="--share: 25.0%"></span></span>
+<strong>15</strong>
+</dd>
+</div>
+<div class="status-in-review">
+<dt><span aria-hidden="true" class="status-dot"></span>In Review</dt>
+<dd>
+<span aria-hidden="true" class="workflow-track"><span style="--share: 25.0%"></span></span>
+<strong>15</strong>
+</dd>
+</div>
+<div class="status-done">
+<dt><span aria-hidden="true" class="status-dot"></span>Done</dt>
+<dd>
+<span aria-hidden="true" class="workflow-track"><span style="--share: 25.0%"></span></span>
+<strong>15</strong>
+</dd>
+</div>
+</dl>
+</section>
+<section aria-labelledby="completion-heading" class="completion-panel">
+<div class="completion-copy">
+<h2 id="completion-heading">Project completion</h2>
+<p><strong>15</strong> of 60 tasks done</p>
+<p class="completion-remaining">45 still open</p>
+</div>
+<div aria-label="25 percent complete" class="completion-ring" role="img" style="--completion: 25%">
+<span>25%</span>
+</div>
+</section>
+</div>
+<div class="overview-grid detail-grid">
+<section aria-labelledby="recent-heading" class="panel recent-panel">
+<div class="panel-heading">
+<h2 id="recent-heading">Recent tasks</h2>
+<p>Last five tasks created</p>
+</div>
+<div aria-labelledby="recent-heading" class="dashboard-table" role="region" tabindex="0">
+<table aria-label="Recently created tasks">
+<thead><tr><th scope="col">Task</th><th class="wide-column" scope="col">Assignee</th><th scope="col">Status</th><th class="wide-column" scope="col">Priority</th><th class="wide-column" scope="col">Created (UTC)</th></tr></thead>
+<tbody>
+<tr>
+<td>
+<a href="#sample-TASK-1060">Capture the release demo notes</a>
+<small>TASK-1060</small>
+<small class="mobile-task-meta">Priya · Medium · <time datetime="2026-11-14T20:00:00.000000+00:00">2026-11-14</time></small>
+</td>
+<td class="wide-column">Priya</td>
+<td><span class="status-label status-done"><span aria-hidden="true" class="status-dot"></span>Done</span></td>
+<td class="wide-column"><span class="priority medium">Medium</span></td>
+<td class="wide-column"><time datetime="2026-11-14T20:00:00.000000+00:00">2026-11-14</time></td>
+</tr>
+<tr>
+<td>
+<a href="#sample-TASK-1059">Compare workload totals to stored tasks</a>
+<small>TASK-1059</small>
+<small class="mobile-task-meta">Omar · Medium · <time datetime="2026-11-14T19:00:00.000000+00:00">2026-11-14</time></small>
+</td>
+<td class="wide-column">Omar</td>
+<td><span class="status-label status-in-review"><span aria-hidden="true" class="status-dot"></span>In Review</span></td>
+<td class="wide-column"><span class="priority medium">Medium</span></td>
+<td class="wide-column"><time datetime="2026-11-14T19:00:00.000000+00:00">2026-11-14</time></td>
+</tr>
+<tr>
+<td>
+<a href="#sample-TASK-1058">Review the project review screen</a>
+<small>TASK-1058</small>
+<small class="mobile-task-meta">Avery · Medium · <time datetime="2026-11-14T18:00:00.000000+00:00">2026-11-14</time></small>
+</td>
+<td class="wide-column">Avery</td>
+<td><span class="status-label status-in-progress"><span aria-hidden="true" class="status-dot"></span>In Progress</span></td>
+<td class="wide-column"><span class="priority medium">Medium</span></td>
+<td class="wide-column"><time datetime="2026-11-14T18:00:00.000000+00:00">2026-11-14</time></td>
+</tr>
+<tr>
+<td>
+<a href="#sample-TASK-1057">Prepare the QA sign-off checklist</a>
+<small>TASK-1057</small>
+<small class="mobile-task-meta">Priya · Low · <time datetime="2026-11-14T17:00:00.000000+00:00">2026-11-14</time></small>
+</td>
+<td class="wide-column">Priya</td>
+<td><span class="status-label status-to-do"><span aria-hidden="true" class="status-dot"></span>To Do</span></td>
+<td class="wide-column"><span class="priority low">Low</span></td>
+<td class="wide-column"><time datetime="2026-11-14T17:00:00.000000+00:00">2026-11-14</time></td>
+</tr>
+<tr>
+<td>
+<a href="#sample-TASK-1056">Verify the latest-task ordering</a>
+<small>TASK-1056</small>
+<small class="mobile-task-meta">Omar · Low · <time datetime="2026-11-14T16:00:00.000000+00:00">2026-11-14</time></small>
+</td>
+<td class="wide-column">Omar</td>
+<td><span class="status-label status-done"><span aria-hidden="true" class="status-dot"></span>Done</span></td>
+<td class="wide-column"><span class="priority low">Low</span></td>
+<td class="wide-column"><time datetime="2026-11-14T16:00:00.000000+00:00">2026-11-14</time></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section aria-labelledby="workload-heading" class="panel workload-panel">
+<div class="panel-heading">
+<h2 id="workload-heading">Team workload</h2>
+<p>Open tasks per assignee</p>
+</div>
+<ul class="workload-list">
+<li>
+<div class="workload-row">
+<span aria-hidden="true" class="avatar avatar-1">M</span>
+<span class="workload-name">Maya</span>
+<span class="workload-count">7 open</span>
+
+</div>
+</li>
+<li>
+<div class="workload-row">
+<span aria-hidden="true" class="avatar avatar-2">L</span>
+<span class="workload-name">Leo</span>
+<span class="workload-count">8 open</span>
+
+</div>
+</li>
+<li>
+<div class="workload-row">
+<span aria-hidden="true" class="avatar avatar-3">N</span>
+<span class="workload-name">Nina</span>
+<span class="workload-count">8 open</span>
+
+</div>
+</li>
+<li>
+<div class="workload-row">
+<span aria-hidden="true" class="avatar avatar-4">A</span>
+<span class="workload-name">Avery</span>
+<span class="workload-count">8 open</span>
+
+</div>
+</li>
+<li>
+<div class="workload-row">
+<span aria-hidden="true" class="avatar avatar-5">O</span>
+<span class="workload-name">Omar</span>
+<span class="workload-count">7 open</span>
+
+</div>
+</li>
+<li>
+<div class="workload-row">
+<span aria-hidden="true" class="avatar avatar-6">P</span>
+<span class="workload-name">Priya</span>
+<span class="workload-count">7 open</span>
+
+</div>
+</li>
+</ul>
+</section>
+</div>
+<section aria-labelledby="sample-board-heading" id="sample-board"><h2 id="sample-board-heading">Sample board</h2><div class="board">
+<section aria-labelledby="sample-column-1" class="column" data-status="To Do">
+<h2 id="sample-column-1">To Do <span class="count">15</span></h2>
+<ul class="card-list">
+<li>
+<article class="card" id="sample-TASK-1057">
+<small>TASK-1057</small>
+<strong>Prepare the QA sign-off checklist</strong>
+<span class="card-footer"><span>Priya</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1053">
+<small>TASK-1053</small>
+<strong>Check recovery after a failed save</strong>
+<span class="card-footer"><span>Omar</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1049">
+<small>TASK-1049</small>
+<strong>Review mobile account settings</strong>
+<span class="card-footer"><span>Avery</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1045">
+<small>TASK-1045</small>
+<strong>Outline the upcoming release demo</strong>
+<span class="card-footer"><span>Priya</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1041">
+<small>TASK-1041</small>
+<strong>Check large report downloads</strong>
+<span class="card-footer"><span>Omar</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1037">
+<small>TASK-1037</small>
+<strong>Audit project summary labels</strong>
+<span class="card-footer"><span>Avery</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1033">
+<small>TASK-1033</small>
+<strong>Draft the weekly release brief</strong>
+<span class="card-footer"><span>Priya</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1029">
+<small>TASK-1029</small>
+<strong>Test report pagination</strong>
+<span class="card-footer"><span>Leo</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1025">
+<small>TASK-1025</small>
+<strong>Review the help center links</strong>
+<span class="card-footer"><span>Maya</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1021">
+<small>TASK-1021</small>
+<strong>Review team invitation copy</strong>
+<span class="card-footer"><span>Nina</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1017">
+<small>TASK-1017</small>
+<strong>Update demo project labels</strong>
+<span class="card-footer"><span>Leo</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1013">
+<small>TASK-1013</small>
+<strong>Check the account settings page</strong>
+<span class="card-footer"><span>Maya</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1009">
+<small>TASK-1009</small>
+<strong>Review the onboarding form</strong>
+<span class="card-footer"><span>Nina</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1005">
+<small>TASK-1005</small>
+<strong>Review search results layout</strong>
+<span class="card-footer"><span>Leo</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1001">
+<small>TASK-1001</small>
+<strong>Draft account setup checklist</strong>
+<span class="card-footer"><span>Maya</span><span class="priority low">Low</span></span>
+</article>
+</li>
+</ul>
+</section>
+<section aria-labelledby="sample-column-2" class="column" data-status="In Progress">
+<h2 id="sample-column-2">In Progress <span class="count">15</span></h2>
+<ul class="card-list">
+<li>
+<article class="card" id="sample-TASK-1058">
+<small>TASK-1058</small>
+<strong>Review the project review screen</strong>
+<span class="card-footer"><span>Avery</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1054">
+<small>TASK-1054</small>
+<strong>Write the first-run troubleshooting guide</strong>
+<span class="card-footer"><span>Priya</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1050">
+<small>TASK-1050</small>
+<strong>Test cancellation of an edit</strong>
+<span class="card-footer"><span>Omar</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1046">
+<small>TASK-1046</small>
+<strong>Clarify workspace setup instructions</strong>
+<span class="card-footer"><span>Avery</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1042">
+<small>TASK-1042</small>
+<strong>Refresh the support FAQ</strong>
+<span class="card-footer"><span>Priya</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1038">
+<small>TASK-1038</small>
+<strong>Verify the import error report</strong>
+<span class="card-footer"><span>Omar</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1034">
+<small>TASK-1034</small>
+<strong>Review the billing history screen</strong>
+<span class="card-footer"><span>Avery</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1030">
+<small>TASK-1030</small>
+<strong>Review the project overview</strong>
+<span class="card-footer"><span>Nina</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1026">
+<small>TASK-1026</small>
+<strong>Check file upload feedback</strong>
+<span class="card-footer"><span>Leo</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1022">
+<small>TASK-1022</small>
+<strong>Check sorting on the reports page</strong>
+<span class="card-footer"><span>Maya</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1018">
+<small>TASK-1018</small>
+<strong>Review the activity timeline</strong>
+<span class="card-footer"><span>Nina</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1014">
+<small>TASK-1014</small>
+<strong>Review form validation messages</strong>
+<span class="card-footer"><span>Leo</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1010">
+<small>TASK-1010</small>
+<strong>Check keyboard focus order</strong>
+<span class="card-footer"><span>Maya</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1006">
+<small>TASK-1006</small>
+<strong>Verify report export headers</strong>
+<span class="card-footer"><span>Nina</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1002">
+<small>TASK-1002</small>
+<strong>Confirm empty board behavior</strong>
+<span class="card-footer"><span>Leo</span><span class="priority low">Low</span></span>
+</article>
+</li>
+</ul>
+</section>
+<section aria-labelledby="sample-column-3" class="column" data-status="In Review">
+<h2 id="sample-column-3">In Review <span class="count">15</span></h2>
+<ul class="card-list">
+<li>
+<article class="card" id="sample-TASK-1059">
+<small>TASK-1059</small>
+<strong>Compare workload totals to stored tasks</strong>
+<span class="card-footer"><span>Omar</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1055">
+<small>TASK-1055</small>
+<strong>Review task detail formatting</strong>
+<span class="card-footer"><span>Avery</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1051">
+<small>TASK-1051</small>
+<strong>Prepare the project review agenda</strong>
+<span class="card-footer"><span>Priya</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1047">
+<small>TASK-1047</small>
+<strong>Verify keyboard access to filters</strong>
+<span class="card-footer"><span>Omar</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1043">
+<small>TASK-1043</small>
+<strong>Review priority labels for accessibility</strong>
+<span class="card-footer"><span>Avery</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1039">
+<small>TASK-1039</small>
+<strong>Prepare reviewer demo accounts</strong>
+<span class="card-footer"><span>Priya</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1035">
+<small>TASK-1035</small>
+<strong>Test invitation expiry</strong>
+<span class="card-footer"><span>Omar</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1031">
+<small>TASK-1031</small>
+<strong>Map the account recovery flow</strong>
+<span class="card-footer"><span>Avery</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1027">
+<small>TASK-1027</small>
+<strong>Update the support contact page</strong>
+<span class="card-footer"><span>Nina</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1023">
+<small>TASK-1023</small>
+<strong>Verify profile field limits</strong>
+<span class="card-footer"><span>Leo</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1019">
+<small>TASK-1019</small>
+<strong>Test the import preview</strong>
+<span class="card-footer"><span>Maya</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1015">
+<small>TASK-1015</small>
+<strong>Draft support handoff notes</strong>
+<span class="card-footer"><span>Nina</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1011">
+<small>TASK-1011</small>
+<strong>Update release notes</strong>
+<span class="card-footer"><span>Leo</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1007">
+<small>TASK-1007</small>
+<strong>Document password reset steps</strong>
+<span class="card-footer"><span>Maya</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1003">
+<small>TASK-1003</small>
+<strong>Write billing page help text</strong>
+<span class="card-footer"><span>Nina</span><span class="priority low">Low</span></span>
+</article>
+</li>
+</ul>
+</section>
+<section aria-labelledby="sample-column-4" class="column" data-status="Done">
+<h2 id="sample-column-4">Done <span class="count">15</span></h2>
+<ul class="card-list">
+<li>
+<article class="card" id="sample-TASK-1060">
+<small>TASK-1060</small>
+<strong>Capture the release demo notes</strong>
+<span class="card-footer"><span>Priya</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1056">
+<small>TASK-1056</small>
+<strong>Verify the latest-task ordering</strong>
+<span class="card-footer"><span>Omar</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1052">
+<small>TASK-1052</small>
+<strong>Draft accessible form hints</strong>
+<span class="card-footer"><span>Avery</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1048">
+<small>TASK-1048</small>
+<strong>Document known demo limitations</strong>
+<span class="card-footer"><span>Priya</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1044">
+<small>TASK-1044</small>
+<strong>Test combined report filters</strong>
+<span class="card-footer"><span>Omar</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1040">
+<small>TASK-1040</small>
+<strong>Design the empty search state</strong>
+<span class="card-footer"><span>Avery</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1036">
+<small>TASK-1036</small>
+<strong>Update the customer handoff checklist</strong>
+<span class="card-footer"><span>Priya</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1032">
+<small>TASK-1032</small>
+<strong>Check document upload limits</strong>
+<span class="card-footer"><span>Omar</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1028">
+<small>TASK-1028</small>
+<strong>Verify the settings confirmation</strong>
+<span class="card-footer"><span>Maya</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1024">
+<small>TASK-1024</small>
+<strong>Draft the deployment checklist</strong>
+<span class="card-footer"><span>Nina</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1020">
+<small>TASK-1020</small>
+<strong>Prepare test account data</strong>
+<span class="card-footer"><span>Leo</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1016">
+<small>TASK-1016</small>
+<strong>Check archived project visibility</strong>
+<span class="card-footer"><span>Maya</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1012">
+<small>TASK-1012</small>
+<strong>Verify date formatting</strong>
+<span class="card-footer"><span>Nina</span><span class="priority low">Low</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1008">
+<small>TASK-1008</small>
+<strong>Add sample customer records</strong>
+<span class="card-footer"><span>Leo</span><span class="priority high">High</span></span>
+</article>
+</li>
+<li>
+<article class="card" id="sample-TASK-1004">
+<small>TASK-1004</small>
+<strong>Check mobile navigation</strong>
+<span class="card-footer"><span>Maya</span><span class="priority medium">Medium</span></span>
+</article>
+</li>
+</ul>
+</section>
+</div></section></div>
+</main>
+</body>
+</html>
