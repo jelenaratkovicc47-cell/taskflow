@@ -47,7 +47,17 @@ These screenshots show the original demo captured on November 21, before the red
 
 ## Jira, GitHub, and submission status
 
-The assessment is tracked in [TF-1](https://jelenaratkovicc47.atlassian.net/browse/TF-1). The issue link was provided before implementation began. The local history records planning (`acb7050`), application work (`b1da058`), and verification and CI setup (`3aa9fb2`). Jira milestone comments and transitions are awaiting authenticated Jira access.
+TF-1 was created before implementation began. The six child items track the work from planning through delivery. The original implementation commit covers task management, status history, the board, the dashboard, and SQLite storage, so several items share that commit. [Assessment epic TF-1](https://jelenaratkovicc47.atlassian.net/browse/TF-1) · [Original implementation commit](https://github.com/jelenaratkovicc47-cell/taskflow/commit/b1da058)
+
+| Jira work item | Published evidence |
+| --- | --- |
+| [TF-1](https://jelenaratkovicc47.atlassian.net/browse/TF-1) · Deliver TaskFlow | [Repository](https://github.com/jelenaratkovicc47-cell/taskflow), [public dashboard](https://jelenaratkovicc47-cell.github.io/taskflow/), and [passing CI run](https://github.com/jelenaratkovicc47-cell/taskflow/actions/runs/45039152830) |
+| [TF-2](https://jelenaratkovicc47.atlassian.net/browse/TF-2) · Plan the project | [Original intent, specification, and plan](https://github.com/jelenaratkovicc47-cell/taskflow/commit/acb7050) |
+| [TF-3](https://jelenaratkovicc47.atlassian.net/browse/TF-3) · Create and edit tasks | [Task routes and form validation](https://github.com/jelenaratkovicc47-cell/taskflow/blob/b1da058/taskflow/app.py) |
+| [TF-4](https://jelenaratkovicc47.atlassian.net/browse/TF-4) · Track status and history | [SQLite status transaction](https://github.com/jelenaratkovicc47-cell/taskflow/blob/b1da058/taskflow/store.py) and [history screenshot](docs/evidence/task-history.png) |
+| [TF-5](https://jelenaratkovicc47.atlassian.net/browse/TF-5) · Build the board and dashboard | [Public dashboard and sample board](https://jelenaratkovicc47-cell.github.io/taskflow/) and [dashboard redesign commit](https://github.com/jelenaratkovicc47-cell/taskflow/commit/7b19cdb) |
+| [TF-6](https://jelenaratkovicc47.atlassian.net/browse/TF-6) · Seed tasks and verify persistence | [Expanded sample-data script](https://github.com/jelenaratkovicc47-cell/taskflow/blob/7b19cdb/taskflow/seed.py) and [restart verification](#verification-results) |
+| [TF-7](https://jelenaratkovicc47.atlassian.net/browse/TF-7) · Test and document delivery | [Test and CI setup](https://github.com/jelenaratkovicc47-cell/taskflow/commit/3aa9fb2), [passing CI run](https://github.com/jelenaratkovicc47-cell/taskflow/actions/runs/45039152830), and [README](README.md) |
 
 The GitHub Actions workflow installs the test dependencies and runs pytest on pushes and pull requests. The hosted `test` job passed on commit `f635480`, which includes the dashboard redesign, expanded sample data, and public preview. [GitHub Actions workflow](.github/workflows/ci.yml) · [TaskFlow repository](https://github.com/jelenaratkovicc47-cell/taskflow) · [Passing GitHub Actions run](https://github.com/jelenaratkovicc47-cell/taskflow/actions/runs/45037969015)
 
